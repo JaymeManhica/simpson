@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora do Método de Simpson</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+        header {
+            background: #007acc;
+            color: white;
+            padding: 1rem 0;
+            margin-bottom: 20px;
+        }
+        h1 {
+            margin: 0;
+        }
+        main {
+            padding: 20px;
+        }
+        form {
+            display: inline-block;
+            text-align: left;
+            background: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+        form label {
+            display: block;
+            margin-top: 10px;
+        }
+        form input {
+            width: 100%;
+            padding: 5px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        form button {
+            width: 100%;
+            padding: 10px;
+            background: #007acc;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        form button:hover {
+            background: #005fa3;
+        }
+        #resultado {
+            margin-top: 20px;
+            text-align: left;
+        }
+        table {
+            margin: 10px auto;
+            border-collapse: collapse;
+            width: 80%;
+        }
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+        th, td {
+            padding: 8px;
+            text-align: center;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Calculadora do Método de Simpson</h1>
+    </header>
+    <main>
+        <form id="simpsonForm">
+            <label for="funcao">Função f(x):</label>
+            <input type="text" id="funcao" placeholder="Exemplo: x**2 + 3*x + 2" required>
+            
+            <label for="limiteInferior">Limite Inferior (a):</label>
+            <input type="number" id="limiteInferior" required>
+            
+            <label for="limiteSuperior">Limite Superior (b):</label>
+            <input type="number" id="limiteSuperior" required>
+            
+            <label for="subintervalos">Número de Subintervalos (n):</label>
+            <input type="number" id="subintervalos" required min="2" step="2">
+            
+            <button type="button" onclick="calcularSimpson()">Calcular</button>
+        </form>
+        <div id="resultado"></div>
+    </main>
+
+    <script>
+    function calcularSimpson() {
+        const funcaoStr = document.getElementById('funcao').value.replace(/\^/g, '**');
+        const a = parseFloat(document.getElementById('limiteInferior').value);
+        const b = parseFloat(document.getElementById('limiteSuperior').value);
+        const n = parseInt(document.getElementById('subintervalos').value);
+
+        if (isNaN(a) || isNaN(b) || isNaN(n) || n <= 0 || n % 2 !== 0) {
+            alert("Por favor, insira valores numéricos válidos e um número par para subintervalos.");
+            return;
+        }
+
+        try {
+            const f = new Function('x', `return ${funcaoStr}`);
+            
+            const h = (b - a) / n; // Tamanho do subintervalo
+            let pontos = [];
+            let soma = f(a) + f(b); // Soma inicial com os extremos
+
+            for (let i = 0; i <= n; i++) {
+                const x = a + i * h; // Ponto x no subintervalo
+                const fx = f(x)+i+1;
+                pontos.push({ i, x: x.toFixed(2), fx: fx.toFixed(2) });
+                if (i > 0 && i < n) {
+                    soma += (i % 2 === 0 ? 2 : 4) * fx; // Soma com os coeficientes
+                }
+            }
+
+            const resultado = (h / 3) * soma;
+
+            // Criar tabelas de resultados
+            let html = `<h2>Resultados</h2>`;
+            html += `<h3>Passo 1: Valor de h</h3>`;
+            html += `<p>h = ${h.toFixed(2)}</p>`;
+            
+            html += `<h3>Passo 2: Pontos de Avaliação</h3>`;
+            html += `<table><tr><th>i</th><th>x_i</th><th>f(x_i)</th></tr>`;
+            pontos.forEach(p => {
+                html += `<tr><td>${p.i}</td><td>${p.x}</td><td>${p.fx}</td></tr>`;
+            });
+            html += `</table>`;
+
+            html += `<h3>Passo 3: Resultado Final</h3>`;
+            html += `<p>A aproximação da integral é: ${resultado.toFixed(6)}</p>`;
+
+            document.getElementById('resultado').innerHTML = html;
+        } catch (error) {
+            alert("Erro na função inserida. Por favor, revise sua entrada.");
+            console.error(error);
+        }
+    }
+    </script>
+</body>
+</html>
